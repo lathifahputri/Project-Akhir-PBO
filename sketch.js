@@ -139,3 +139,109 @@ function playGame(){
       }
   }
   
+  if(count_onplay % 500 == 1){
+      for(let a = 0; a< virus_count; a++){
+          isvAttack[a] = true;
+          atv_x[a] = vs[a].x;  
+          atv_y[a] = vs[a].y;
+          atv_pos[a] = h_pos;
+      }
+  }
+  
+  for(let a = 0; a< virus_count; a++){
+      if (((vs[a].y >= hero.y-30)&&(vs[a].y <= hero.y+50))&&((vs[a].x >= hero.x)&&(vs[a].x <= hero.x+110))){
+          hero.life--;
+          vs.splice(a,1);
+          virus_count--;
+      }
+  }
+  for(let a = 0; a< virus_count; a++){
+      if (isvAttack[a]) {
+          if(atv_pos[a] == 1)
+            atv_y[a] += 2;
+          else if(atv_pos[a] == 2)
+            atv_x[a] -= 2;
+          else if(atv_pos[a] == 3)
+            atv_y[a] += 2;
+          else if(atv_pos[a] == 4)
+            atv_x[a] += 2;
+          vs[a].attack(atv, atv_x[a], atv_y[a]);
+      }
+      if ((atv_x > 600)||(atv_x < 0)||(atv_y > 500)||(atv_y < 0)) {
+          isvAttack[a] = false;
+      }
+      if (((at_y >= vs[a].y-30)&&(at_y <= vs[a].y+30))&&((at_x >= vs[a].x-20)&&(at_x <= vs[a].x+20))){
+          at_y = -100;
+          at_x = -100;
+          isAttack = false;
+          hero.increaseScore();
+          vs[a].life--;
+          if(level.getCurrentLevel() != level.getLatestLevel()){
+              level.latestLevel = level.currentLevel;
+          }
+          if(vs[a].life == 0){
+              vs.splice(a,1);
+              virus_count--;
+          }
+      }
+      if (((atv_y[a] >= hero.y-30)&&(atv_y[a] <= hero.y+50))&&((atv_x[a] >= hero.x)&&(atv_x[a] <= hero.x+110))){
+          atv_y[a] = -100;
+          atv_x[a] = -100;
+          isvAttack[a] = false;
+          hero.life--;
+      }
+  }
+  if (keyIsDown(87)) {
+    hero.moveUp();
+    h_pos = 1;
+  }
+  else if (keyIsDown(83)) {
+    hero.moveDown();
+    h_pos = 3;
+  }
+  else if (keyIsDown(68)) {
+    hero.moveRight();
+    h_pos = 2;
+  }
+  else if (keyIsDown(65)) {
+    hero.moveLeft();
+    h_pos = 4;
+  }
+  if (keyIsDown(32)) {
+    if (isAttack == false) {
+      isAttack = true;
+      at_y = hero.y+10;
+      at_x = hero.x+10;
+      at_pos = h_pos;
+    }
+  }
+  if (isAttack) {
+    if(at_pos == 1)
+      at_y -= 10;
+    else if(at_pos == 2)
+      at_x += 10;
+    else if(at_pos == 3)
+      at_y += 10;
+    else if(at_pos == 4)
+      at_x -= 10;
+    
+    hero.attack(at, at_x, at_y);
+  }
+  if ((at_x > 600)||(at_x < 0)||(at_y > 500)||(at_y < 0)) {
+    isAttack = false;
+  }
+  if((hero.score > 0)&&(hero.score % 120 == 0)&&(level.getCurrentLevel() < level.maxLevel)){
+    level.setLevel(level.getLatestLevel()+1);
+    mp.move();
+    hero.score += 10;
+  }
+  if(hero.life == 0)
+  {
+    gameover = true;
+  }    
+  hero.draw(h_pos);
+  hero.calculateLife(lv);
+  level.showLevel();    
+  hero.saveScore();
+  count_onplay++;
+}
